@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
+
 public class InventoryServiceApplication {
 
 	public static void main(String[] args) {
@@ -19,11 +20,14 @@ public class InventoryServiceApplication {
 		return args-> {
 			Inventory inventory = new Inventory();
 			inventory.setSkuCode("Iphone_13");
-			inventory.setQuantity(12);
+			inventory.setQuantity(4);
+			Inventory inventory1 = new Inventory();
+			inventory1.setSkuCode("Iphone_13_red");
+			inventory1.setQuantity(0);
 
 
 			inventoryRepository.save(inventory);
-
+			inventoryRepository.save(inventory1);
 		};
 	}
 
