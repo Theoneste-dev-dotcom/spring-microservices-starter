@@ -21,34 +21,35 @@ public class OrderService {
     OrderRepository orderRepository;
 
     @Autowired
-    WebClient.Builder  webClientBuilder;
+    WebClient.Builder webClientBuilder;
 
 
     public void placeOrder(OrderRequest orderRequest) {
         Order order = new Order();
         order.setOrderNumber(UUID.randomUUID().toString());
-        List<OrderLineItems> orderLineItems =  orderRequest.getOrderLineItemsDtoList()
+        List<OrderLineItems> orderLineItems = orderRequest.getOrderLineItemsDtoList()
                 .stream()
                 .map(this::mapToDto)
                 .toList();
 
-      order.setOrderLIneItemsList(orderLineItems);
+        order.setOrderLIneItemsList(orderLineItems);
 
 
-     List<String> skuCodes = order.getOrderLIneItemsList().stream()
-             .map(OrderLineItems::getSkuCode)
-             .toList();
+        List<String> skuCodes = order.getOrderLIneItemsList().stream()
+                .map(OrderLineItems::getSkuCode)
+                .toList();
 
 
-        for(String skuCode : skuCodes) {
+        for (String skuCode : skuCodes) {
             System.out.println(skuCode);
-        };
-      InventoryResponse[] inventoryResponses =   webClientBuilder.build().get()
+        }
+        ;
+        InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
                 .uri("http://inventory-service/api/inventory",
                         uriBuilder -> uriBuilder.queryParam("skuCode", skuCodes).build())
-                        .retrieve()
-                                .bodyToMono(InventoryResponse[].class)
-                                        .block();
+                .retrieve()
+                .bodyToMono(InventoryResponse[].class)
+                .block();
 //        InventoryResponse[] inventoryResponses;
 
         assert inventoryResponses != null;
@@ -72,7 +73,7 @@ public class OrderService {
         }
     }
 
-    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto){
+    private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {
         OrderLineItems orderLineItems = new OrderLineItems();
         orderLineItems.setQuantity(orderLineItemsDto.getQuantity());
         orderLineItems.setPrice(orderLineItemsDto.getPrice());
