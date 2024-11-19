@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.concurrent.CompletableFuture;
+
 @RestController
 @RequestMapping("/api/order")
 @Transactional
@@ -22,9 +24,9 @@ public class OrderController {
     @ResponseStatus(HttpStatus.CREATED)
     @CircuitBreaker(name="inventory", fallbackMethod = "fallbackMethod")
     @TimeLimiter(name = "inventory")
-    public String placeOrder(@RequestBody OrderRequest orderRequest) {
-        orderService.placeOrder(orderRequest);
-        return "Order placed successfully";
+    public CompletableFuture<String> placeOrder(@RequestBody OrderRequest orderRequest) {
+       return CompletableFuture.supplyAsync(()->orderService.placeOrder(orderRequest));
+
     }
     @GetMapping
     public String welcome(){
