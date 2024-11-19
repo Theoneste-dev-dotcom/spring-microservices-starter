@@ -2,6 +2,8 @@ package com.example.order_service.controller;
 
 import com.example.order_service.dto.OrderRequest;
 import com.example.order_service.service.OrderService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ public class OrderController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
+    @CircuitBreaker(name="inventory", fallbackMethod = "fallbackMethod")
+    @TimeLimiter(name = "inventory")
     public String placeOrder(@RequestBody OrderRequest orderRequest) {
         orderService.placeOrder(orderRequest);
         return "Order placed successfully";
@@ -25,5 +29,9 @@ public class OrderController {
     @GetMapping
     public String welcome(){
         return "Please welcome on our ";
+    }
+
+    public String fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException) {
+        return "OOPs! sorry Try again";
     }
 }
