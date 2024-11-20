@@ -3,6 +3,7 @@ package com.example.order_service.service;
 import com.example.order_service.dto.InventoryResponse;
 import com.example.order_service.dto.OrderLineItemsDto;
 import com.example.order_service.dto.OrderRequest;
+import com.example.order_service.event.OrderPlaceEvent;
 import com.example.order_service.model.Order;
 import com.example.order_service.model.OrderLineItems;
 import com.example.order_service.repository.OrderRepository;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -22,9 +24,12 @@ import static jakarta.persistence.GenerationType.UUID;
 @Service
 public class OrderService {
 
+
     @Autowired
     Tracer tracer;
 
+ @Autowired
+ KafkaTemplate<String, OrderPlaceEvent> kafkaTemplate;
 
     @Autowired
     OrderRepository orderRepository;
@@ -81,6 +86,7 @@ public class OrderService {
             if (allProductsInStock) {
 
                 System.out.println("All products are in stock.");
+                kafkaTemplate.send("notificationTopic", new OrderPlaceEvent(order.getOrderNumber()));
                 orderRepository.save(order); // Save order if all products are in stock
                 return "Order placed successfully";
             } else {
